@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+  <h2>Welcome, <%= user.username %> </h2>
+
+
+
+  <!-- Show API key or generate button -->
+  <% if (apiKey) { %>
+    <p><strong>Your API Key:</strong> <%= apiKey %></p>
+  <% } else { %>
+    <form action="/generate-api-key" method="POST">
+      <button type="submit">Generate API Key</button>
+    </form>
+  <% } %>
+
+  <hr>
+
+  <!--  Enable country search only if key exists -->
+  <% if (apiKey) { %>
+    <h3>Find Country Info</h3>
+    <form id="country-form">
+      <input type="text" id="country-input" placeholder="Enter country name" required>
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="country-result" style="margin-top: 20px;"></div>
+  <% } else { %>
+    <p><em>Generate your API key to use country search.</em></p>
+  <% } %>
+
+  <hr>
+
+  <form action="/logout" method="GET">
+    <button type="submit">Logout</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('country-form');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const country = document.getElementById('country-input').value;
+
+        const res = await fetch(`/country/${country}?apikey=<%= apiKey %>`);
+        const data = await res.json();
+
+        const result = document.getElementById('country-result');
+        if (data.error) {
+          result.innerHTML = `<p style="color:red;">${data.error}</p>`;
+        } else {
+          result.innerHTML = `
+            <h4>Country: ${data.name}</h4>
+            <p><strong>Capital:</strong> ${data.capital}</p>
+            <p><strong>Currencies:</strong> ${data.currencies}</p>
+            <p><strong>Languages:</strong> ${data.languages}</p>
+            <img src="${data.flag}" alt="Flag" width="150">
+          `;
+        }
+      });
+    }
+  </script>
+<style>
+   body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    margin: 0;
+  }
+  
+  h2, h3, h4, p {
+    text-align: center;
+  }
+  
+  form {
+    margin: 10px 0;
+    text-align: center;
+  }
+  
+  input, button {
+    padding: 10px;
+    margin: 5px;
+    width: 250px;
+    font-size: 16px;
+  }
+  
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 150px;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  #country-result {
+    text-align: center;
+    margin-top: 20px;
+  }
+</style>
+
+</body>
+</html>
